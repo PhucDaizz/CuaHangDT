@@ -6,35 +6,42 @@
 
     include_once('../../config/db.php');
     include_once('../../model/danhMucSP.php');
+    include_once '../../middleware/check_role.php';
 
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $db = new db();
-        $connect = $db->connect();
-        $danhMucSP = new DanhMucSp($connect);
-    
-        $data = json_decode(file_get_contents("php://input"));
-    
-        // Kiểm tra xem các dữ liệu có null hoặc không tồn tại không
-        if (isset($data->category_name) && isset($data->description) && 
-            !empty($data->category_name) && !empty($data->description)) {
-            
-            // Gán dữ liệu nếu tất cả đều hợp lệ
-            $danhMucSP->category_name = $data->category_name;
-            $danhMucSP->description = $data->description;
-    
-            // Thực hiện tạo mới
-            if($danhMucSP->create()){
-                echo json_encode(array("message" => "Done"));
+    if(checkRole('admin')){
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            $db = new db();
+            $connect = $db->connect();
+            $danhMucSP = new DanhMucSp($connect);
+        
+            $data = json_decode(file_get_contents("php://input"));
+        
+            // Kiểm tra xem các dữ liệu có null hoặc không tồn tại không
+            if (isset($data->category_name) && isset($data->description) && 
+                !empty($data->category_name) && !empty($data->description)) {
+                
+                // Gán dữ liệu nếu tất cả đều hợp lệ
+                $danhMucSP->category_name = $data->category_name;
+                $danhMucSP->description = $data->description;
+        
+                // Thực hiện tạo mới
+                if($danhMucSP->create()){
+                    echo json_encode(array("message" => "Done"));
+                } else {
+                    echo json_encode(array("message" => "Failed to create"));
+                }
+        
             } else {
-                echo json_encode(array("message" => "Failed to create"));
+                // Trả về thông báo lỗi nếu có dữ liệu null hoặc rỗng
+                echo json_encode(array("message" => "Invalid input: category_id, category_name, and description are required"));
             }
-    
-        } else {
-            // Trả về thông báo lỗi nếu có dữ liệu null hoặc rỗng
-            echo json_encode(array("message" => "Invalid input: category_id, category_name, and description are required"));
+        } else{
+            echo json_encode(array('message' => 'Invalid request method. Only POST requests are allowed.'));
         }
-    } else{
-        echo json_encode(array('message' => 'Invalid request method. Only POST requests are allowed.'));
     }
+    else {
+        exit();
+    }
+
 
 ?>

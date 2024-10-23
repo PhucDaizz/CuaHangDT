@@ -11,6 +11,10 @@ class SanPham {
     public $supplier_id;
     public $created_at;
     public $updated_at;
+    public $thumbnail_image;    // Ảnh đại diện
+    public $detail_image1;      // Ảnh chi tiết 1
+    public $detail_image2;      // Ảnh chi tiết 2
+    public $detail_image3;      // Ảnh chi tiết 3
 
     public function __construct($db)
     {
@@ -49,6 +53,10 @@ class SanPham {
         $this->supplier_id = $row['supplier_id'];
         $this->created_at = $row['created_at'];
         $this->updated_at = $row['updated_at'];
+        $this->thumbnail_image = isset($row['thumbnail_image']) ? $row['thumbnail_image'] : null;
+        $this->detail_image1 = isset($row['detail_image1']) ? $row['detail_image1'] : null;
+        $this->detail_image2 = isset($row['detail_image2']) ? $row['detail_image2'] : null;
+        $this->detail_image3 = isset($row['detail_image3']) ? $row['detail_image3'] : null;
         return $stmt;
     }
 
@@ -62,7 +70,7 @@ class SanPham {
 
     public function create(){
         $query = "INSERT INTO sanpham SET product_name=:product_name, description=:description, price=:price, stock=:stock, 
-                    category_id=:category_id, supplier_id=:supplier_id, created_at=:created_at, updated_at=:updated_at ";
+                    category_id=:category_id, supplier_id=:supplier_id, thumbnail_image=:thumbnail_image, detail_image1=:detail_image1, detail_image2=:detail_image2, detail_image3=:detail_image3 ,created_at=:created_at, updated_at=:updated_at ";
         $stmt = $this->conn->prepare($query);
 
         $this->product_name = htmlspecialchars(strip_tags($this->product_name));        
@@ -70,7 +78,7 @@ class SanPham {
         $this->price = htmlspecialchars(strip_tags($this->price));        
         $this->stock = htmlspecialchars(strip_tags($this->stock));        
         $this->category_id = htmlspecialchars(strip_tags($this->category_id));        
-        $this->supplier_id = htmlspecialchars(strip_tags($this->supplier_id));        
+        $this->supplier_id = htmlspecialchars(strip_tags($this->supplier_id));              
         $this->created_at = htmlspecialchars(strip_tags($this->created_at));        
         $this->updated_at = htmlspecialchars(strip_tags($this->updated_at));        
 
@@ -80,8 +88,12 @@ class SanPham {
         $stmt->bindParam('price', $this->price);
         $stmt->bindParam('stock', $this->stock);
         $stmt->bindParam('category_id', $this->category_id);
-        $stmt->bindParam('created_at', $this->created_at);
         $stmt->bindParam('supplier_id', $this->supplier_id);
+        $stmt->bindParam('thumbnail_image', $this->thumbnail_image);
+        $stmt->bindParam('detail_image1', $this->detail_image1);
+        $stmt->bindParam('detail_image2', $this->detail_image2);
+        $stmt->bindParam('detail_image3', $this->supplier_id);
+        $stmt->bindParam('created_at', $this->created_at);
         $stmt->bindParam('updated_at', $this->updated_at);
 
         if($stmt->execute()){

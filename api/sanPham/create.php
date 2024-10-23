@@ -1,47 +1,95 @@
 <?php
-    header('Access-Control-Allow-Origin:*');
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Methods: POST');
-    header('Access-Control-Allow-Headers: Access-Control-Allow-Headers, Content-Type, Access-Control-Allow-Methods, Authorization, X-Requested-With');
+// Required headers
+header("Access-Control-Allow-Origin: *");
+header("Content-Type: application/json; charset=UTF-8");
+header("Access-Control-Allow-Methods: POST");
 
-    include_once('../../config/db.php');
-    include_once('../../model/sanPham.php');
+// Include Composer autoloader
+require_once __DIR__ . '/../../vendor/autoload.php';
 
+// Include Cloudinary config file
+require_once __DIR__ . '/../../config/cloudinary_config.php';  
+// Import Cloudinary Upload API
+use Cloudinary\Api\Upload\UploadApi;
+
+// Include database và model
+require_once '../../config/db.php';
+require_once '../../model/sanPham.php';
+include_once '../../middleware/check_role.php';
+
+
+if(checkRole('admin')) {
+    // Kiểm tra phương thức request
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        // Database connection
         $db = new db();
         $connect = $db->connect();
         $sanPham = new SanPham($connect);
-    
-        $data = json_decode(file_get_contents("php://input"));
-    
-        // Kiểm tra xem các dữ liệu có null hoặc không tồn tại không
-        if (isset($data->product_name) && isset($data->price) &&  isset($data->stock) &&
-            !empty($data->product_name) && !empty($data->price && !empty($data->stock))) {
-            
-            // Gán dữ liệu nếu tất cả đều hợp lệ
-            $sanPham->product_name = $data->product_name;
-            $sanPham->description = $data->description;
-            $sanPham->price = $data->price;
-            $sanPham->stock = $data->stock;
-            $sanPham->category_id = $data->category_id;
-            $sanPham->supplier_id = $data->supplier_id;
-            $sanPham->created_at = $data->created_at;
-            $sanPham->updated_at = $data->updated_at;
-    
-            // Thực hiện tạo mới
-            if($sanPham->create()){
-                echo json_encode(array("message" => "Done"));
-            } else {
-                echo json_encode(array("message" => "Failed to create"));
-            }
-    
-        } else {
-            // Trả về thông báo lỗi nếu có dữ liệu null hoặc rỗng
-            echo json_encode(array("message" => "Invalid input: product_name , price are required"));
-        }
 
+        // Kiểm tra dữ liệu đầu vào
+        if (isset($_POST['product_name']) && isset($_POST['price']) && isset($_POST['stock']) &&
+            !empty($_POST['product_name']) && !empty($_POST['price']) && !empty($_POST['stock'])) {
+
+            // Gán dữ liệu cơ bản
+            $sanPham->product_name = $_POST['product_name'];
+            $sanPham->description = $_POST['description'] ?? '';
+            $sanPham->price = $_POST['price'];
+            $sanPham->stock = $_POST['stock'];
+            $sanPham->category_id = $_POST['category_id'] ?? null;
+            $sanPham->supplier_id = $_POST['supplier_id'] ?? null;
+            $sanPham->created_at = date('Y-m-d H:i:s');
+            $sanPham->updated_at = date('Y-m-d H:i:s');
+
+            try {
+                $upload = new UploadApi();
+
+                // Upload ảnh đại diện
+                if (isset($_FILES['thumbnail_image']) && $_FILES['thumbnail_image']['error'] === UPLOAD_ERR_OK) {
+                    $thumbnail_upload = $upload->upload($_FILES['thumbnail_image']['tmp_name'], [
+                        'folder' => 'products/thumbnails'
+                    ]);
+                    $sanPham->thumbnail_image = $thumbnail_upload['secure_url'];
+                }
+
+                // Upload ảnh chi tiết
+                for ($i = 1; $i <= 3; $i++) {
+                    $field_name = "detail_image{$i}";
+                    if (isset($_FILES[$field_name]) && $_FILES[$field_name]['error'] === UPLOAD_ERR_OK) {
+                        $detail_upload = $upload->upload($_FILES[$field_name]['tmp_name'], [
+                            'folder' => 'products/details'
+                        ]);
+                        $property = "detail_image{$i}";
+                        $sanPham->$property = $detail_upload['secure_url'];
+                    }
+                }
+
+                // Tạo sản phẩm
+                if($sanPham->create()) {
+                    http_response_code(201);
+                    echo json_encode(array("message" => "Done"));
+                } else {
+                    http_response_code(503);
+                    echo json_encode(array("message" => "Failed to create"));
+                }
+
+            } catch (Exception $e) {
+                http_response_code(500);
+                echo json_encode(array(
+                    "message" => "Upload failed",
+                    "error" => $e->getMessage()
+                ));
+            }
+        } else {
+            http_response_code(400);
+            echo json_encode(array("message" => "Invalid input: product_name, price, and stock are required"));
+        }
     } else {
+        http_response_code(405);
         echo json_encode(array('message' => 'Invalid request method. Only POST requests are allowed.'));
     }
+}
+else {
+    exit();
+}
 
 ?>

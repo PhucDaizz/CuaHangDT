@@ -6,34 +6,41 @@
 
     include_once('../../config/db.php');
     include_once('../../model/danhMucSP.php');
+    include_once '../../middleware/check_role.php';
 
-    if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-        // Kết nối tới cơ sở dữ liệu
-        $db = new db();
-        $connect = $db->connect();
-    
-        $danhMucSP = new DanhMucSp($connect);
-    
-        if(isset($_GET['category_id'])) {
-            $danhMucSP->category_id  = $_GET['category_id'];
-    
-            if($danhMucSP->exists()) {
-                if ($danhMucSP->delete()) {
-                    echo json_encode(array('message' => 'danhMucSP Deleted'));
+    if(checkRole('admin')) {
+        if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+            // Kết nối tới cơ sở dữ liệu
+            $db = new db();
+            $connect = $db->connect();
+        
+            $danhMucSP = new DanhMucSp($connect);
+        
+            if(isset($_GET['category_id'])) {
+                $danhMucSP->category_id  = $_GET['category_id'];
+        
+                if($danhMucSP->exists()) {
+                    if ($danhMucSP->delete()) {
+                        echo json_encode(array('message' => 'danhMucSP Deleted'));
+                    } else {
+                        echo json_encode(array('message' => 'danhMucSP Not Deleted'));
+                    }
                 } else {
-                    echo json_encode(array('message' => 'danhMucSP Not Deleted'));
+                    // Nếu không tồn tại, trả về thông báo
+                    echo json_encode(array('message' => 'danhMucSP ID does not exist'));
                 }
             } else {
-                // Nếu không tồn tại, trả về thông báo
-                echo json_encode(array('message' => 'danhMucSP ID does not exist'));
+                // Nếu không có ID trên URL, trả về thông báo
+                echo json_encode(array('message' => 'No danhMucSP ID provided'));
             }
-        } else {
-            // Nếu không có ID trên URL, trả về thông báo
-            echo json_encode(array('message' => 'No danhMucSP ID provided'));
+        } else{
+            echo json_encode(array('message' => 'Invalid request method. Only DELETE requests are allowed.'));
         }
-    } else{
-        echo json_encode(array('message' => 'Invalid request method. Only DELETE requests are allowed.'));
     }
+    else {
+        exit();
+    }
+
 
 
 ?>

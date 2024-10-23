@@ -6,35 +6,40 @@
 
     include_once('../../config/db.php');
     include_once('../../model/nhaCungCap.php');
+    include_once '../../middleware/check_role.php';
 
-    if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
-        // Kết nối tới cơ sở dữ liệu
-        $db = new db();
-        $connect = $db->connect();
-    
-        $nhacungCap = new NhaCungCap($connect);
-    
-        if(isset($_GET['id'])) {
-            $nhacungCap->supplier_id  = $_GET['id'];
-    
-            if($nhacungCap->exists()) {
-                if ($nhacungCap->delete()) {
-                    echo json_encode(array('message' => 'nhacungCap Deleted'));
+    if(checkRole('admin')) {
+        if ($_SERVER['REQUEST_METHOD'] === 'DELETE') {
+            // Kết nối tới cơ sở dữ liệu
+            $db = new db();
+            $connect = $db->connect();
+        
+            $nhacungCap = new NhaCungCap($connect);
+        
+            if(isset($_GET['id'])) {
+                $nhacungCap->supplier_id  = $_GET['id'];
+        
+                if($nhacungCap->exists()) {
+                    if ($nhacungCap->delete()) {
+                        echo json_encode(array('message' => 'nhacungCap Deleted'));
+                    } else {
+                        echo json_encode(array('message' => 'nhacungCap Not Deleted'));
+                    }
                 } else {
-                    echo json_encode(array('message' => 'nhacungCap Not Deleted'));
+                    // Nếu không tồn tại, trả về thông báo
+                    echo json_encode(array('message' => 'nhacungCap ID does not exist'));
                 }
             } else {
-                // Nếu không tồn tại, trả về thông báo
-                echo json_encode(array('message' => 'nhacungCap ID does not exist'));
+                // Nếu không có ID trên URL, trả về thông báo
+                echo json_encode(array('message' => 'No nhacungCap ID provided'));
             }
-        } else {
-            // Nếu không có ID trên URL, trả về thông báo
-            echo json_encode(array('message' => 'No nhacungCap ID provided'));
+    
+        } else{
+            echo json_encode(array('message' => 'Invalid request method. Only DELETE requests are allowed.'));
         }
-
-    } else{
-        echo json_encode(array('message' => 'Invalid request method. Only DELETE requests are allowed.'));
     }
-
+    else{
+        exit();
+    }
 
 ?>

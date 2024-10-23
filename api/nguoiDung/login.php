@@ -23,6 +23,7 @@ include_once '../../vendor/firebase/php-jwt/src/ExpiredException.php';
 include_once '../../vendor/firebase/php-jwt/src/SignatureInvalidException.php';
 include_once '../../vendor/firebase/php-jwt/src/JWT.php';
 use \Firebase\JWT\JWT;
+use Firebase\JWT\Key;
 
 if($email_exists && password_verify($data->password, $user->password)) {
     $token = array(
