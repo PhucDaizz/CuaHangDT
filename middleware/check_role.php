@@ -42,3 +42,24 @@ function checkRole($required_role) {
         return false;
     }
 }
+function getCustomerIdFromToken() {
+    global $key;
+    // Lấy token từ header
+    $headers = getallheaders();
+    $jwt = isset($headers['Authorization']) ? str_replace('Bearer ', '', $headers['Authorization']) : null;
+    
+    if (!$jwt) {
+        throw new Exception('Token không tồn tại');
+    }
+    
+    try {
+        // Giải mã token
+        $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+        
+        // Lấy customer_id từ payload của token
+        return $decoded->data->customer_id;
+        
+    } catch (Exception $e) {
+        throw new Exception('Token không hợp lệ');
+    }
+}
