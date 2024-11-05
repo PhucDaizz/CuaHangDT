@@ -25,6 +25,10 @@
             'supplier_id' => $sanPham->supplier_id,
             'created_at' => $sanPham->created_at,
             'updated_at' => $sanPham->updated_at,
+            'thumbnail_image' => $sanPham->thumbnail_image,
+            'detail_image1' => $sanPham->detail_image1,
+            'detail_image2' => $sanPham->detail_image2,
+            'detail_image3' => $sanPham->detail_image3
         );
         echo(json_encode($sanPham_item));
     } else{

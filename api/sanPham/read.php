@@ -37,7 +37,8 @@
                     'category_id' =>  $category_id,
                     'supplier_id' =>  $supplier_id,
                     'created_at' =>  $created_at,
-                    'updated_at' =>  $updated_at
+                    'updated_at' =>  $updated_at,
+                    'thumbnail_image' => $thumbnail_image
                 );
                 array_push($sanPham_array['data'], $sanPham_item);
             }
