@@ -16,8 +16,9 @@
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 20;
         $sort_by = isset($_GET['sort_by']) ? $_GET['sort_by'] : 'product_id';
         $sort_order = isset($_GET['sort_order']) ? $_GET['sort_order'] : 'DESC';
+        $category_id = isset($_GET['category_id']) ? (int)$_GET['category_id'] : null;
     
-        $read = $sanPham->read($page, $limit, $sort_by, $sort_order);
+        $read = $sanPham->read($page, $limit, $sort_by, $sort_order, $category_id);
     
         $num = $read->rowCount();
     

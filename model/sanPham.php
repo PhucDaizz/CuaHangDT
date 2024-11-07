@@ -21,7 +21,7 @@ class SanPham {
         $this->conn = $db;
     }
 
-    public function read($page = 1, $limit = 20, $sort_by='product_id', $sort_order = 'DESC') {
+    public function read($page = 1, $limit = 20, $sort_by='product_id', $sort_order = 'DESC', $category_id = null) {
         $offset = ($page - 1) * $limit;
         $allowed_sort_columns = ['product_id', 'product_name', 'price', 'created_at'];
         $allowed_sort_orders = ['ASC', 'DESC'];
@@ -29,8 +29,15 @@ class SanPham {
         $sort_by = in_array($sort_by, $allowed_sort_columns) ? $sort_by : 'product_id';
         $sort_order = in_array(strtoupper($sort_order), $allowed_sort_orders) ? strtoupper($sort_order) : 'DESC';
 
-        $query = "SELECT * FROM sanpham ORDER BY $sort_by $sort_order LIMIT :limit OFFSET :offset";
-        $stmt = $this->conn->prepare($query);
+        if ($category_id) { 
+            $query = "SELECT * FROM sanpham WHERE category_id = :category_id ORDER BY $sort_by $sort_order LIMIT :limit OFFSET :offset"; 
+            $stmt = $this->conn->prepare($query); 
+            $stmt->bindParam(':category_id', $category_id, PDO::PARAM_INT);
+        }
+        else {
+            $query = "SELECT * FROM sanpham ORDER BY $sort_by $sort_order LIMIT :limit OFFSET :offset"; 
+            $stmt = $this->conn->prepare($query);
+        }
         $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
         $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
         $stmt->execute();

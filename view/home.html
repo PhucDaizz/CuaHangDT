@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Display</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            width: 80%;
+            margin: 0 auto;
+        }
+        .product {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px;
+            display: inline-block;
+            width: calc(25% - 42px);
+            vertical-align: top;
+        }
+        .product img {
+            max-width: 100%;
+        }
+        .product h3 {
+            font-size: 1.2em;
+            margin: 10px 0;
+        }
+        .product p {
+            margin: 5px 0;
+        }
+        .product .price {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Product Display</h1>
+        <div id="product-list"></div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
